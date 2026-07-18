@@ -1,0 +1,109 @@
+<div class="flex flex-col gap-8">
+<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="flex items-center gap-2 text-base font-bold text-gray-900">📅 Asistencia de hoy</div>
+  <p class="mt-0.5 text-sm text-gray-500">{{ todayLabel() }}</p>
+
+  @if (!loadingToday()) {
+    @if (!todayRecord()) {
+      <div class="mt-4 flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-yellow-800">
+        ⚠ No hay asistencia registrada hoy
+      </div>
+    } @else {
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <app-status-badge [status]="todayRecord()!.status" />
+        <span class="text-sm text-gray-500">
+          Entrada: {{ todayRecord()!.timeIn.slice(0, 5) }}
+          @if (todayRecord()!.timeOut) {
+            · Salida: {{ todayRecord()!.timeOut!.slice(0, 5) }}
+          }
+        </span>
+      </div>
+    }
+  }
+
+  @if (errorMessage()) {
+    <div class="mt-4 flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-yellow-800">
+      ⚠ {{ errorMessage() }}
+    </div>
+  }
+
+  <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <button
+      type="button"
+      class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+      [disabled]="!canCheckIn() || actionLoading()"
+      (click)="quickCheckIn()"
+    >
+      🕐 Marcar entrada ({{ currentTimeLabel() }})
+    </button>
+    <button
+      type="button"
+      class="inline-flex items-center justify-center gap-2 rounded-lg border border-red-600 bg-white px-4 py-3.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+      [disabled]="!canCheckOut() || actionLoading()"
+      (click)="quickCheckOut()"
+    >
+      🕐 Marcar salida ({{ currentTimeLabel() }})
+    </button>
+  </div>
+</div>
+
+<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="text-base font-bold text-gray-900">Registrar asistencia</div>
+  <p class="mt-0.5 text-sm text-gray-500">Ingresa manualmente los datos de tu asistencia</p>
+
+  <form [formGroup]="form" (ngSubmit)="submitManual()" class="mt-5">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="timeIn">Hora de entrada *</label>
+        <input
+          id="timeIn"
+          type="time"
+          formControlName="timeIn"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="timeOut">Hora de salida</label>
+        <input
+          id="timeOut"
+          type="time"
+          formControlName="timeOut"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        />
+      </div>
+    </div>
+
+    <div class="mt-4 flex flex-col gap-1.5">
+      <label class="text-sm font-semibold text-gray-700" for="status">Estado *</label>
+      <select
+        id="status"
+        formControlName="status"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+      >
+        <option value="Present">Presente</option>
+        <option value="Late">Tarde</option>
+        <option value="Absent">Ausente</option>
+      </select>
+    </div>
+
+    <div class="mt-4 flex flex-col gap-1.5">
+      <label class="text-sm font-semibold text-gray-700" for="notes">Notas (opcional)</label>
+      <textarea
+        id="notes"
+        formControlName="notes"
+        placeholder="Agrega alguna nota adicional..."
+        rows="3"
+        class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+      ></textarea>
+    </div>
+
+    <button
+      type="submit"
+      class="mt-5 w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+      [disabled]="form.invalid || actionLoading()"
+    >
+      Registrar asistencia
+    </button>
+  </form>
+</div>
+</div>

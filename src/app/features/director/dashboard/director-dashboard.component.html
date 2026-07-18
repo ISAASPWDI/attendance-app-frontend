@@ -1,0 +1,197 @@
+<div class="flex flex-col gap-8">
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <app-stat-card icon="📈" tone="primary" [value]="summary()?.totalRecords ?? 0" label="Total de registros" />
+  <app-stat-card icon="✅" tone="success" [value]="summary()?.presentToday ?? 0" label="Presentes hoy" />
+  <app-stat-card icon="⚠️" tone="warning" [value]="summary()?.lateToday ?? 0" label="Tardanzas hoy" />
+  <app-stat-card icon="❌" tone="danger" [value]="summary()?.absentToday ?? 0" label="Ausentes hoy" />
+</div>
+
+<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="flex items-center gap-2 text-base font-bold text-gray-900">🔽 Filtros y búsqueda</div>
+
+  <form [formGroup]="filterForm" class="mt-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="teacherName">Buscar docente</label>
+        <input
+          id="teacherName"
+          type="text"
+          placeholder="Nombre del docente..."
+          formControlName="teacherName"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="status">Estado</label>
+        <select
+          id="status"
+          formControlName="status"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        >
+          <option value="">Todos los estados</option>
+          <option value="Present">Presente</option>
+          <option value="Late">Tarde</option>
+          <option value="Absent">Ausente</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="fromDate">Desde</label>
+        <input
+          id="fromDate"
+          type="date"
+          formControlName="fromDate"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="toDate">Hasta</label>
+        <input
+          id="toDate"
+          type="date"
+          formControlName="toDate"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="sortBy">Ordenar por</label>
+        <select
+          id="sortBy"
+          formControlName="sortBy"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        >
+          <option value="date">Fecha</option>
+          <option value="teacherName">Nombre del docente</option>
+          <option value="status">Estado</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="order">Orden</label>
+        <select
+          id="order"
+          formControlName="order"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        >
+          <option value="desc">Más recientes primero</option>
+          <option value="asc">Más antiguos primero</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mt-4 flex justify-end">
+      <button
+        type="button"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-600 shadow-sm transition-all hover:bg-gray-50 hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-300"
+        (click)="clearFilters()"
+      >
+        Limpiar filtros
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-base font-bold text-gray-900">👥 Registros de asistencia</div>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-gray-500">{{ recordsPage().totalElements }} registro(s)</span>
+      <select
+        class="rounded-lg border border-gray-300 bg-white px-2.5 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+        [value]="pageSize()"
+        (change)="changePageSize(+$any($event.target).value)"
+      >
+        <option [value]="10">10 por página</option>
+        <option [value]="25">25 por página</option>
+        <option [value]="50">50 por página</option>
+      </select>
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-gray-50 hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="downloading() === 'excel'"
+        (click)="download('excel')"
+      >
+        <svg class="h-4 w-4 text-gray-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        {{ downloading() === 'excel' ? 'Generando…' : 'Excel' }}
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-gray-50 hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="downloading() === 'pdf'"
+        (click)="download('pdf')"
+      >
+        <svg class="h-4 w-4 text-gray-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        {{ downloading() === 'pdf' ? 'Generando…' : 'PDF' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-4 overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="whitespace-nowrap py-2.5 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Docente</th>
+          <th class="whitespace-nowrap py-2.5 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha</th>
+          <th class="whitespace-nowrap py-2.5 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Entrada</th>
+          <th class="whitespace-nowrap py-2.5 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Salida</th>
+          <th class="whitespace-nowrap py-2.5 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</th>
+          <th class="whitespace-nowrap py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-500">Notas</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (record of recordsPage().content; track record.id) {
+          <tr class="border-b border-gray-100 last:border-0">
+            <td class="whitespace-nowrap py-3 pr-3 font-medium text-gray-900">{{ record.teacherName }}</td>
+            <td class="whitespace-nowrap py-3 pr-3 text-gray-600">📅 {{ record.date }}</td>
+            <td class="whitespace-nowrap py-3 pr-3 text-gray-600">🕐 {{ formatTime(record.timeIn) }}</td>
+            <td class="whitespace-nowrap py-3 pr-3">
+              @if (record.timeOut) {
+                <span class="text-gray-600">🕐 {{ formatTime(record.timeOut) }}</span>
+              } @else {
+                <span class="text-gray-400">No registrada</span>
+              }
+            </td>
+            <td class="whitespace-nowrap py-3 pr-3"><app-status-badge [status]="record.status" /></td>
+            <td class="py-3 text-gray-600">{{ record.notes || '-' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="py-6 text-center text-gray-400">
+              {{ loading() ? 'Cargando…' : 'No se encontraron registros de asistencia.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
+    <span>Página {{ recordsPage().number + 1 }} de {{ recordsPage().totalPages || 1 }}</span>
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 font-semibold text-gray-600 shadow-sm transition-all hover:bg-gray-50 hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+        [disabled]="recordsPage().first"
+        (click)="goToPage(page() - 1)"
+      >
+        Anterior
+      </button>
+      <button
+        type="button"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 font-semibold text-gray-600 shadow-sm transition-all hover:bg-gray-50 hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+        [disabled]="recordsPage().last"
+        (click)="goToPage(page() + 1)"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
+</div>
+</div>

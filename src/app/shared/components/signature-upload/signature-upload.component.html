@@ -1,0 +1,18 @@
+<div>
+  <button
+    type="button"
+    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+    [disabled]="uploading()"
+    (click)="triggerSelect()"
+  >
+    ✍️ {{ uploading() ? 'Subiendo…' : 'Subir firma' }}
+  </button>
+  @if (successMessage()) {
+    <p class="mt-1 text-xs font-medium text-green-700">{{ successMessage() }}</p>
+  }
+  @if (errorMessage()) {
+    <p class="mt-1 text-xs font-medium text-red-600">{{ errorMessage() }}</p>
+  }
+
+  <input #fileInput type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
+</div>
