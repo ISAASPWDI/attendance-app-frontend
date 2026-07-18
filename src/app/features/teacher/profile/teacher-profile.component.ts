@@ -1,10 +1,11 @@
 import { Component, computed, inject } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { PhotoUploadComponent } from '../../../shared/components/photo-upload/photo-upload.component';
+import { SignatureUploadComponent } from '../../../shared/components/signature-upload/signature-upload.component';
 
 @Component({
   selector: 'app-teacher-profile',
-  imports: [PhotoUploadComponent],
+  imports: [PhotoUploadComponent, SignatureUploadComponent],
   templateUrl: './teacher-profile.component.html',
   styleUrl: './teacher-profile.component.css'
 })

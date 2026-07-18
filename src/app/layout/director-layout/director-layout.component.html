@@ -10,6 +10,13 @@
       </a>
 
       <div class="flex items-center gap-4">
+        <a
+          routerLink="/director/attendance"
+          routerLinkActive="text-red-600"
+          class="text-sm font-semibold text-gray-600 transition-colors hover:text-red-600"
+        >
+          🕐 Mi asistencia
+        </a>
         <a routerLink="/director/profile" title="Profile">
           @if (user()?.photoUrl) {
             <img class="h-9 w-9 rounded-full border border-gray-200 object-cover" [src]="user()!.photoUrl!" alt="Profile photo" />

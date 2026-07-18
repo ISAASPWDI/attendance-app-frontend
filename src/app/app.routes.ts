@@ -63,6 +63,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'attendance',
+        loadComponent: () =>
+          import('./features/teacher/dashboard/teacher-dashboard.component').then(
+            m => m.TeacherDashboardComponent
+          )
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/director/profile/director-profile.component').then(

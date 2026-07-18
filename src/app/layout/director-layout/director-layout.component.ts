@@ -1,11 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-director-layout',
-  imports: [RouterOutlet, RouterLink, ConfirmDialogComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ConfirmDialogComponent],
   templateUrl: './director-layout.component.html',
   styleUrl: './director-layout.component.css'
 })

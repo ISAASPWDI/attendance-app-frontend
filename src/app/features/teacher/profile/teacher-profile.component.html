@@ -3,13 +3,14 @@
   <p class="mt-0.5 text-sm text-gray-500">{{ user()?.firstName }} {{ user()?.lastName }} · {{ user()?.username }}</p>
 
   @if (user()) {
-    <div class="mt-5">
+    <div class="mt-5 flex flex-wrap items-center gap-6">
       <app-photo-upload
         [userId]="user()!.id"
         [photoUrl]="user()!.photoUrl"
         [initials]="initials()"
         (uploaded)="onPhotoUploaded($event)"
       />
+      <app-signature-upload [userId]="user()!.id" />
     </div>
   }
 </div>

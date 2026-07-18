@@ -104,9 +104,9 @@
         [value]="pageSize()"
         (change)="changePageSize(+$any($event.target).value)"
       >
-        <option [value]="10">10 por página</option>
-        <option [value]="25">25 por página</option>
-        <option [value]="50">50 por página</option>
+        <option [value]="10" [selected]="pageSize() === 10">10 por página</option>
+        <option [value]="25" [selected]="pageSize() === 25">25 por página</option>
+        <option [value]="50" [selected]="pageSize() === 50">50 por página</option>
       </select>
       <button
         type="button"
