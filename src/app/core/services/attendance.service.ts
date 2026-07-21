@@ -42,6 +42,10 @@ export class AttendanceService {
     return this.http.get<Page<AttendanceRecordWithUser>>(this.base, { params: toHttpParams(filter) });
   }
 
+  listMine(filter: AttendanceFilter): Observable<Page<AttendanceRecord>> {
+    return this.http.get<Page<AttendanceRecord>>(`${this.base}/me`, { params: toHttpParams(filter) });
+  }
+
   deleteByDate(date: string): Observable<{ deletedCount: number; date: string }> {
     return this.http.delete<{ deletedCount: number; date: string }>(`${this.base}/by-date/${date}`);
   }

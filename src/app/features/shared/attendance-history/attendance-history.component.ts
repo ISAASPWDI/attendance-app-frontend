@@ -3,16 +3,13 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
 import { AttendanceService } from '../../../core/services/attendance.service';
-import { DashboardService } from '../../../core/services/dashboard.service';
-import { ReportService } from '../../../core/services/report.service';
-import { AttendanceFilter, AttendanceRecordWithUser, DashboardSummary } from '../../../core/models/attendance.model';
+import { AttendanceFilter, AttendanceRecord } from '../../../core/models/attendance.model';
 import { Page } from '../../../core/models/api.model';
-import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 
 const DEFAULT_PAGE_SIZE = 10;
 
-const EMPTY_PAGE: Page<AttendanceRecordWithUser> = {
+const EMPTY_PAGE: Page<AttendanceRecord> = {
   content: [],
   totalElements: 0,
   totalPages: 0,
@@ -25,27 +22,22 @@ const EMPTY_PAGE: Page<AttendanceRecordWithUser> = {
 };
 
 @Component({
-  selector: 'app-director-dashboard',
-  imports: [ReactiveFormsModule, StatCardComponent, StatusBadgeComponent],
-  templateUrl: './director-dashboard.component.html',
-  styleUrl: './director-dashboard.component.css'
+  selector: 'app-attendance-history',
+  imports: [ReactiveFormsModule, StatusBadgeComponent],
+  templateUrl: './attendance-history.component.html',
+  styleUrl: './attendance-history.component.css'
 })
-export class DirectorDashboardComponent implements OnInit {
+export class AttendanceHistoryComponent implements OnInit {
   private attendanceService = inject(AttendanceService);
-  private dashboardService = inject(DashboardService);
-  private reportService = inject(ReportService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
-  readonly summary = signal<DashboardSummary | null>(null);
-  readonly recordsPage = signal<Page<AttendanceRecordWithUser>>(EMPTY_PAGE);
+  readonly recordsPage = signal<Page<AttendanceRecord>>(EMPTY_PAGE);
   readonly loading = signal(true);
-  readonly downloading = signal<'excel' | 'pdf' | null>(null);
   readonly page = signal(0);
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
 
   readonly filterForm = this.fb.nonNullable.group({
-    teacherName: [''],
     status: [''],
     fromDate: [''],
     toDate: [''],
@@ -55,7 +47,6 @@ export class DirectorDashboardComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadSummary();
     this.loadRecords();
 
     this.filterForm.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -64,14 +55,9 @@ export class DirectorDashboardComponent implements OnInit {
     });
   }
 
-  private loadSummary(): void {
-    this.dashboardService.getSummary().subscribe(summary => this.summary.set(summary));
-  }
-
   private loadRecords(): void {
     this.loading.set(true);
-    const filter = this.currentFilter();
-    this.attendanceService.list(filter).subscribe({
+    this.attendanceService.listMine(this.currentFilter()).subscribe({
       next: page => {
         this.recordsPage.set(page);
         this.loading.set(false);
@@ -83,7 +69,6 @@ export class DirectorDashboardComponent implements OnInit {
   private currentFilter(): AttendanceFilter {
     const raw = this.filterForm.getRawValue();
     return {
-      teacherName: raw.teacherName || undefined,
       status: (raw.status || undefined) as AttendanceFilter['status'],
       fromDate: raw.fromDate || undefined,
       toDate: raw.toDate || undefined,
@@ -96,15 +81,7 @@ export class DirectorDashboardComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filterForm.reset({
-      teacherName: '',
-      status: '',
-      fromDate: '',
-      toDate: '',
-      dayOfWeek: '',
-      sortBy: 'date',
-      order: 'desc'
-    });
+    this.filterForm.reset({ status: '', fromDate: '', toDate: '', dayOfWeek: '', sortBy: 'date', order: 'desc' });
   }
 
   changePageSize(size: number): void {
@@ -117,30 +94,6 @@ export class DirectorDashboardComponent implements OnInit {
     if (next < 0 || next >= this.recordsPage().totalPages) return;
     this.page.set(next);
     this.loadRecords();
-  }
-
-  download(kind: 'excel' | 'pdf'): void {
-    if (this.downloading()) return;
-    this.downloading.set(kind);
-    const filter = this.currentFilter();
-    const request$ = kind === 'excel' ? this.reportService.downloadExcel(filter) : this.reportService.downloadPdf(filter);
-
-    request$.subscribe({
-      next: blob => {
-        this.triggerDownload(blob, kind === 'excel' ? 'asistencias.xlsx' : 'asistencias.pdf');
-        this.downloading.set(null);
-      },
-      error: () => this.downloading.set(null)
-    });
-  }
-
-  private triggerDownload(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.click();
-    URL.revokeObjectURL(url);
   }
 
   formatTime(value: string | null): string {

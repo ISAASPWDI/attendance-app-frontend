@@ -1,5 +1,14 @@
 export type AttendanceStatus = 'Present' | 'Late' | 'Absent';
 
+export type DayOfWeekKey =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY';
+
 export interface AttendanceRecordInput {
   date: string;
   timeIn: string;
@@ -11,6 +20,7 @@ export interface AttendanceRecordInput {
 export interface AttendanceRecord {
   id: number;
   date: string;
+  dayOfWeek: string;
   timeIn: string;
   timeOut: string | null;
   status: AttendanceStatus;
@@ -22,6 +32,7 @@ export interface AttendanceRecordWithUser {
   teacherId: number;
   teacherName: string;
   date: string;
+  dayOfWeek: string;
   timeIn: string;
   timeOut: string | null;
   status: AttendanceStatus;
@@ -33,6 +44,7 @@ export interface AttendanceFilter {
   status?: AttendanceStatus | '';
   fromDate?: string;
   toDate?: string;
+  dayOfWeek?: DayOfWeekKey | '';
   sortBy?: 'date' | 'teacherName' | 'status';
   order?: 'asc' | 'desc';
   page?: number;

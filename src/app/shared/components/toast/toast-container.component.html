@@ -1,0 +1,20 @@
+<div class="pointer-events-none fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div
+      class="pointer-events-auto flex max-w-sm items-start gap-2 rounded-lg border px-4 py-3 text-sm font-semibold shadow-lg"
+      [class]="toast.type === 'error'
+        ? 'border-red-200 bg-red-50 text-red-800'
+        : 'border-green-200 bg-green-50 text-green-800'"
+    >
+      <span>{{ toast.type === 'error' ? '⚠' : '✓' }}</span>
+      <span class="flex-1">{{ toast.message }}</span>
+      <button
+        type="button"
+        class="text-lg leading-none opacity-60 hover:opacity-100"
+        (click)="toastService.dismiss(toast.id)"
+      >
+        ×
+      </button>
+    </div>
+  }
+</div>
