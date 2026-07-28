@@ -43,6 +43,7 @@
     [imageSrc]="cropSrc()"
     [aspectRatio]="3"
     [rounded]="false"
+    [fit]="'contain'"
     title="Ajustar firma"
     (cropped)="onCropped($event)"
     (cancelled)="onCropCancelled()"

@@ -14,6 +14,8 @@ export class ImageCropperComponent {
   readonly aspectRatio = input(1);
   readonly rounded = input(false);
   readonly title = input('Ajustar imagen');
+  /** 'cover' fills the frame and crops overflow (photos); 'contain' guarantees the whole image stays visible (signatures). */
+  readonly fit = input<'cover' | 'contain'>('cover');
 
   readonly cropped = output<Blob>();
   readonly cancelled = output<void>();
@@ -36,7 +38,9 @@ export class ImageCropperComponent {
     const nw = this.naturalWidth();
     const nh = this.naturalHeight();
     if (!nw || !nh) return 0;
-    return Math.max(this.viewportWidth / nw, this.viewportHeight() / nh);
+    const wRatio = this.viewportWidth / nw;
+    const hRatio = this.viewportHeight() / nh;
+    return this.fit() === 'contain' ? Math.min(wRatio, hRatio) : Math.max(wRatio, hRatio);
   });
 
   readonly displayWidth = computed(() => this.naturalWidth() * this.baseScale() * this.zoom());
@@ -80,10 +84,10 @@ export class ImageCropperComponent {
   }
 
   private clampPosition(): void {
-    const minX = this.viewportWidth - this.displayWidth();
-    const minY = this.viewportHeight() - this.displayHeight();
-    this.posX.set(Math.min(0, Math.max(minX, this.posX())));
-    this.posY.set(Math.min(0, Math.max(minY, this.posY())));
+    const deltaX = this.viewportWidth - this.displayWidth();
+    const deltaY = this.viewportHeight() - this.displayHeight();
+    this.posX.set(Math.min(Math.max(0, deltaX), Math.max(Math.min(0, deltaX), this.posX())));
+    this.posY.set(Math.min(Math.max(0, deltaY), Math.max(Math.min(0, deltaY), this.posY())));
   }
 
   apply(): void {
