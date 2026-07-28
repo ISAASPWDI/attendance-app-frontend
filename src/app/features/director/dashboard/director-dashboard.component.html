@@ -7,6 +7,88 @@
 </div>
 
 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-base font-bold text-gray-900">🗓️ Registrar asistencia para un docente</div>
+    <button
+      type="button"
+      class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow"
+      (click)="toggleCreateForm()"
+    >
+      {{ showCreateForm() ? 'Cancelar' : 'Registrar asistencia' }}
+    </button>
+  </div>
+
+  @if (showCreateForm()) {
+    <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="mt-4">
+      <p class="mb-3 text-sm text-gray-500">Úsalo cuando un docente no pudo marcar su asistencia por una falla o interrupción — no aplica las ventanas horarias de entrada/salida.</p>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-gray-700" for="createTeacherId">Docente</label>
+          <select
+            id="createTeacherId"
+            formControlName="teacherId"
+            required
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+          >
+            <option value="">Selecciona un docente</option>
+            @for (teacher of teachers(); track teacher.id) {
+              <option [value]="teacher.id">{{ teacherLabel(teacher) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-gray-700" for="createDate">Fecha</label>
+          <input id="createDate" type="date" formControlName="date" required
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-gray-700" for="createStatus">Estado</label>
+          <select
+            id="createStatus"
+            formControlName="status"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+          >
+            <option value="Present">Presente</option>
+            <option value="Late">Tarde</option>
+            <option value="Absent">Ausente</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-gray-700" for="createTimeIn">Hora de entrada</label>
+          <input id="createTimeIn" type="time" formControlName="timeIn" required
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-gray-700" for="createTimeOut">Hora de salida (opcional)</label>
+          <input id="createTimeOut" type="time" formControlName="timeOut"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-gray-700" for="createNotes">Notas (opcional)</label>
+          <input id="createNotes" type="text" formControlName="notes"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end">
+        <button
+          type="submit"
+          class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          [disabled]="createForm.invalid || creating()"
+        >
+          {{ creating() ? 'Guardando…' : 'Guardar asistencia' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>
+
+<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
   <div class="flex items-center gap-2 text-base font-bold text-gray-900">🔽 Filtros y búsqueda</div>
 
   <form [formGroup]="filterForm" class="mt-4">

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateUserRequest, UpdateUserRequest, UserDetail } from '../models/user.model';
+import { CreateUserRequest, UpdateUserRequest, UserDetail, UserRole } from '../models/user.model';
 import { Page } from '../models/api.model';
 import { toHttpParams } from '../utils/http-params.util';
 
@@ -11,8 +11,8 @@ export class UserService {
   private http = inject(HttpClient);
   private base = `${environment.apiUrl}/users`;
 
-  list(username: string | undefined, page: number, size: number): Observable<Page<UserDetail>> {
-    return this.http.get<Page<UserDetail>>(this.base, { params: toHttpParams({ username, page, size }) });
+  list(username: string | undefined, page: number, size: number, role?: UserRole): Observable<Page<UserDetail>> {
+    return this.http.get<Page<UserDetail>>(this.base, { params: toHttpParams({ username, page, size, role }) });
   }
 
   getById(id: number): Observable<UserDetail> {

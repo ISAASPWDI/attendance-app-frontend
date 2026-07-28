@@ -44,6 +44,25 @@
     </div>
   </header>
 
+  @if (purgeWarning()?.active && !purgeWarningDismissed()) {
+    <div class="border-b border-yellow-200 bg-yellow-50 px-4 py-3 sm:px-8 lg:px-12">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm font-medium text-yellow-800">
+          ⚠ Quedan {{ purgeWarning()?.daysRemaining }} día(s) antes de que se elimine el historial de asistencias de este mes —
+          verifica que todos los docentes tengan su asistencia registrada (puedes completarla desde
+          "Registrar asistencia para un docente" en el panel de asistencias).
+        </p>
+        <button
+          type="button"
+          class="text-sm font-semibold text-yellow-800 hover:underline"
+          (click)="purgeWarningDismissed.set(true)"
+        >
+          Ocultar
+        </button>
+      </div>
+    </div>
+  }
+
   <div class="px-4 py-8 sm:px-8 lg:px-12">
     <router-outlet />
   </div>

@@ -1,14 +1,22 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
 import { AttendanceService } from '../../../core/services/attendance.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { ReportService } from '../../../core/services/report.service';
-import { AttendanceFilter, AttendanceRecordWithUser, DashboardSummary } from '../../../core/models/attendance.model';
+import { UserService } from '../../../core/services/user.service';
+import {
+  AttendanceFilter,
+  AttendanceRecordWithUser,
+  AttendanceStatus,
+  DashboardSummary
+} from '../../../core/models/attendance.model';
 import { Page } from '../../../core/models/api.model';
+import { UserDetail } from '../../../core/models/user.model';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -34,6 +42,8 @@ export class DirectorDashboardComponent implements OnInit {
   private attendanceService = inject(AttendanceService);
   private dashboardService = inject(DashboardService);
   private reportService = inject(ReportService);
+  private userService = inject(UserService);
+  private toast = inject(ToastService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
@@ -43,6 +53,10 @@ export class DirectorDashboardComponent implements OnInit {
   readonly downloading = signal<'excel' | 'pdf' | null>(null);
   readonly page = signal(0);
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
+
+  readonly teachers = signal<UserDetail[]>([]);
+  readonly showCreateForm = signal(false);
+  readonly creating = signal(false);
 
   readonly filterForm = this.fb.nonNullable.group({
     teacherName: [''],
@@ -54,14 +68,64 @@ export class DirectorDashboardComponent implements OnInit {
     order: ['desc']
   });
 
+  readonly createForm = this.fb.nonNullable.group({
+    teacherId: ['', Validators.required],
+    date: ['', Validators.required],
+    timeIn: ['', Validators.required],
+    timeOut: [''],
+    status: ['Present', Validators.required],
+    notes: ['']
+  });
+
   ngOnInit(): void {
     this.loadSummary();
     this.loadRecords();
+    this.loadTeachers();
 
     this.filterForm.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.page.set(0);
       this.loadRecords();
     });
+  }
+
+  private loadTeachers(): void {
+    this.userService.list(undefined, 0, 1000, 'TEACHER').subscribe(page => this.teachers.set(page.content));
+  }
+
+  teacherLabel(teacher: UserDetail): string {
+    const name = [teacher.firstName, teacher.lastName].filter(Boolean).join(' ');
+    return name || teacher.username;
+  }
+
+  toggleCreateForm(): void {
+    this.showCreateForm.update(open => !open);
+  }
+
+  submitCreate(): void {
+    if (this.createForm.invalid || this.creating()) return;
+    const raw = this.createForm.getRawValue();
+    if (!raw.teacherId || !raw.date || !raw.timeIn) return;
+
+    this.creating.set(true);
+    this.attendanceService
+      .createForUser(+raw.teacherId, {
+        date: raw.date,
+        timeIn: raw.timeIn,
+        timeOut: raw.timeOut || null,
+        status: raw.status as AttendanceStatus,
+        notes: raw.notes || null
+      })
+      .subscribe({
+        next: () => {
+          this.creating.set(false);
+          this.showCreateForm.set(false);
+          this.createForm.reset({ teacherId: '', date: '', timeIn: '', timeOut: '', status: 'Present', notes: '' });
+          this.toast.show('Asistencia registrada correctamente.', 'success');
+          this.loadRecords();
+          this.loadSummary();
+        },
+        error: () => this.creating.set(false)
+      });
   }
 
   private loadSummary(): void {

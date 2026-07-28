@@ -38,6 +38,10 @@ export class AttendanceService {
     return this.http.patch<AttendanceRecord>(`${this.base}/${id}`, record);
   }
 
+  createForUser(userId: number, record: AttendanceRecordInput): Observable<AttendanceRecord> {
+    return this.http.post<AttendanceRecord>(`${this.base}/for-user/${userId}`, record);
+  }
+
   list(filter: AttendanceFilter): Observable<Page<AttendanceRecordWithUser>> {
     return this.http.get<Page<AttendanceRecordWithUser>>(this.base, { params: toHttpParams(filter) });
   }

@@ -57,3 +57,9 @@ export interface DashboardSummary {
   lateToday: number;
   absentToday: number;
 }
+
+export interface PurgeWarning {
+  active: boolean;
+  daysRemaining: number | null;
+  purgeDate: string | null;
+}

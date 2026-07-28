@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { DashboardSummary } from '../models/attendance.model';
+import { DashboardSummary, PurgeWarning } from '../models/attendance.model';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
@@ -10,5 +10,9 @@ export class DashboardService {
 
   getSummary(): Observable<DashboardSummary> {
     return this.http.get<DashboardSummary>(`${environment.apiUrl}/dashboard/summary`);
+  }
+
+  getPurgeWarning(): Observable<PurgeWarning> {
+    return this.http.get<PurgeWarning>(`${environment.apiUrl}/dashboard/purge-warning`);
   }
 }
