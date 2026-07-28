@@ -63,3 +63,9 @@ export interface PurgeWarning {
   daysRemaining: number | null;
   purgeDate: string | null;
 }
+
+export interface DayStatus {
+  holiday: boolean;
+  holidayName: string | null;
+  weekend: boolean;
+}

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AttendanceService } from '../../../core/services/attendance.service';
-import { AttendanceRecord, AttendanceStatus } from '../../../core/models/attendance.model';
+import { AttendanceRecord, AttendanceStatus, DayStatus } from '../../../core/models/attendance.model';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { AttendanceHistoryComponent } from '../../shared/attendance-history/attendance-history.component';
 
@@ -30,6 +30,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   readonly todayRecord = signal<AttendanceRecord | null>(null);
   readonly loadingToday = signal(true);
   readonly actionLoading = signal(false);
+  readonly dayStatus = signal<DayStatus | null>(null);
 
   readonly todayLabel = computed(() =>
     new Intl.DateTimeFormat('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(
@@ -57,7 +58,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
     return 'open';
   });
 
-  readonly canCheckIn = computed(() => this.entryWindowStatus() === 'open');
+  readonly canCheckIn = computed(() => this.entryWindowStatus() === 'open' && !this.dayStatus()?.holiday);
 
   readonly exitWindowStatus = computed<WindowStatus>(() => {
     if (this.mode() !== 'exit') return null;
@@ -67,7 +68,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
     return 'open';
   });
 
-  readonly canCheckOut = computed(() => this.exitWindowStatus() === 'open');
+  readonly canCheckOut = computed(() => this.exitWindowStatus() === 'open' && !this.dayStatus()?.holiday);
 
   readonly exitInTolerance = computed(
     () => this.exitWindowStatus() === 'open' && this.minutesNow() > EXIT_ON_TIME_CUTOFF_MINUTES
@@ -84,6 +85,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadToday();
+    this.attendanceService.getDayStatus().subscribe(status => this.dayStatus.set(status));
     this.clockHandle = setInterval(() => this.today.set(new Date()), 1000);
   }
 

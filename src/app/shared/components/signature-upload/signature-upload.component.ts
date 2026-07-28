@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnDestroy, inject, input, output, signal, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UserService } from '../../../core/services/user.service';
+import { ImageCropperComponent } from '../image-cropper/image-cropper.component';
 
 /**
  * Write-only upload control: signatureUrl is intentionally never returned by the backend to the
@@ -9,6 +10,7 @@ import { UserService } from '../../../core/services/user.service';
  */
 @Component({
   selector: 'app-signature-upload',
+  imports: [ImageCropperComponent],
   templateUrl: './signature-upload.component.html',
   styleUrl: './signature-upload.component.css'
 })
@@ -26,6 +28,9 @@ export class SignatureUploadComponent implements OnDestroy {
   readonly pendingFile = signal<File | null>(null);
   readonly previewUrl = signal<string | null>(null);
 
+  readonly cropSrc = signal<string | null>(null);
+  readonly cropOpen = signal(false);
+
   triggerSelect(): void {
     this.fileInput()?.nativeElement.click();
   }
@@ -37,9 +42,29 @@ export class SignatureUploadComponent implements OnDestroy {
 
     this.successMessage.set(null);
     this.errorMessage.set(null);
+    this.cropSrc.set(URL.createObjectURL(file));
+    this.cropOpen.set(true);
+  }
+
+  onCropped(blob: Blob): void {
+    this.closeCropper();
     this.revokePreview();
+    const file = new File([blob], 'signature.jpg', { type: blob.type });
     this.pendingFile.set(file);
     this.previewUrl.set(URL.createObjectURL(file));
+  }
+
+  onCropCancelled(): void {
+    this.closeCropper();
+    const input = this.fileInput()?.nativeElement;
+    if (input) input.value = '';
+  }
+
+  private closeCropper(): void {
+    this.cropOpen.set(false);
+    const url = this.cropSrc();
+    if (url) URL.revokeObjectURL(url);
+    this.cropSrc.set(null);
   }
 
   confirmUpload(): void {

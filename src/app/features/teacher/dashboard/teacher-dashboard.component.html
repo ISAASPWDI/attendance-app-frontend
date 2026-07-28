@@ -4,6 +4,12 @@
   <div class="flex items-center gap-2 text-base font-bold text-gray-900">📅 Asistencia de hoy</div>
   <p class="mt-0.5 text-sm text-gray-500">{{ todayLabel() }}</p>
 
+  @if (dayStatus()?.holiday) {
+    <div class="mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+      🎉 Hoy es feriado ({{ dayStatus()?.holidayName }}) — no se registra asistencia
+    </div>
+  }
+
   @if (!loadingToday()) {
     @if (!todayRecord()) {
       <div class="mt-4 flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-yellow-800">
@@ -44,7 +50,9 @@
           >
             🕐 Marcar entrada ({{ currentTimeLabel() }})
           </button>
-          @if (entryWindowStatus() === 'too-early') {
+          @if (dayStatus()?.holiday) {
+            <span class="text-xs text-gray-500">No disponible: hoy es feriado</span>
+          } @else if (entryWindowStatus() === 'too-early') {
             <span class="text-xs text-gray-500">Disponible de 7:30 am a 9:00 am</span>
           } @else if (entryWindowStatus() === 'closed') {
             <span class="text-xs text-gray-500">Registro de entrada cerrado por hoy</span>
@@ -61,7 +69,9 @@
           >
             🕐 Marcar salida ({{ currentTimeLabel() }})
           </button>
-          @if (exitWindowStatus() === 'too-early') {
+          @if (dayStatus()?.holiday) {
+            <span class="text-xs text-gray-500">No disponible: hoy es feriado</span>
+          } @else if (exitWindowStatus() === 'too-early') {
             <span class="text-xs text-gray-500">Disponible de 1:00 pm a 2:00 pm</span>
           } @else if (exitWindowStatus() === 'closed') {
             <span class="text-xs text-gray-500">Registro de salida cerrado por hoy</span>

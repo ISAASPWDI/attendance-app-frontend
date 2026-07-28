@@ -6,7 +6,8 @@ import {
   AttendanceFilter,
   AttendanceRecord,
   AttendanceRecordInput,
-  AttendanceRecordWithUser
+  AttendanceRecordWithUser,
+  DayStatus
 } from '../models/attendance.model';
 import { Page } from '../models/api.model';
 import { toHttpParams } from '../utils/http-params.util';
@@ -15,6 +16,10 @@ import { toHttpParams } from '../utils/http-params.util';
 export class AttendanceService {
   private http = inject(HttpClient);
   private base = `${environment.apiUrl}/attendances`;
+
+  getDayStatus(): Observable<DayStatus> {
+    return this.http.get<DayStatus>(`${this.base}/day-status`);
+  }
 
   getToday(): Observable<AttendanceRecord | null> {
     return this.http

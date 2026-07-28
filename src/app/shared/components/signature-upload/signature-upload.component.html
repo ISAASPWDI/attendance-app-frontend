@@ -37,4 +37,14 @@
   }
 
   <input #fileInput type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
+
+  <app-image-cropper
+    [open]="cropOpen()"
+    [imageSrc]="cropSrc()"
+    [aspectRatio]="3"
+    [rounded]="false"
+    title="Ajustar firma"
+    (cropped)="onCropped($event)"
+    (cancelled)="onCropCancelled()"
+  />
 </div>

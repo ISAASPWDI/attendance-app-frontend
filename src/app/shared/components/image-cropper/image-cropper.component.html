@@ -1,0 +1,64 @@
+@if (open()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4">
+    <div class="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+      <h2 class="text-base font-bold text-gray-900">{{ title() }}</h2>
+      <p class="mt-1 text-xs text-gray-500">Arrastra para mover y usa el control para acercar o alejar.</p>
+
+      <div
+        class="relative mt-4 mx-auto overflow-hidden bg-gray-100 touch-none select-none"
+        [class.rounded-full]="rounded()"
+        [style.width.px]="viewportWidth"
+        [style.height.px]="viewportHeight()"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp()"
+        (pointercancel)="onPointerUp()"
+      >
+        @if (imageSrc()) {
+          <img
+            #sourceImage
+            [src]="imageSrc()"
+            (load)="onImageLoad()"
+            alt="Imagen a recortar"
+            class="absolute cursor-move"
+            draggable="false"
+            [style.left.px]="posX()"
+            [style.top.px]="posY()"
+            [style.width.px]="displayWidth()"
+            [style.height.px]="displayHeight()"
+          />
+        }
+      </div>
+
+      <div class="mt-4 flex items-center gap-3">
+        <span class="text-xs text-gray-500">🔍</span>
+        <input
+          type="range"
+          min="1"
+          max="3"
+          step="0.01"
+          [value]="zoom()"
+          (input)="onZoomChange($any($event.target).value)"
+          class="w-full"
+        />
+      </div>
+
+      <div class="mt-5 flex justify-end gap-3">
+        <button
+          type="button"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+          (click)="cancel()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+          (click)="apply()"
+        >
+          Aplicar
+        </button>
+      </div>
+    </div>
+  </div>
+}

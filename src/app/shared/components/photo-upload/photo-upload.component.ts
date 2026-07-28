@@ -1,9 +1,11 @@
 import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UserService } from '../../../core/services/user.service';
+import { ImageCropperComponent } from '../image-cropper/image-cropper.component';
 
 @Component({
   selector: 'app-photo-upload',
+  imports: [ImageCropperComponent],
   templateUrl: './photo-upload.component.html',
   styleUrl: './photo-upload.component.css'
 })
@@ -19,6 +21,9 @@ export class PhotoUploadComponent {
   readonly uploading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
+  readonly cropSrc = signal<string | null>(null);
+  readonly cropOpen = signal(false);
+
   triggerSelect(): void {
     this.fileInput()?.nativeElement.click();
   }
@@ -28,20 +33,38 @@ export class PhotoUploadComponent {
     const file = input.files?.[0];
     if (!file) return;
 
-    this.uploading.set(true);
     this.errorMessage.set(null);
+    this.cropSrc.set(URL.createObjectURL(file));
+    this.cropOpen.set(true);
+  }
 
+  onCropped(blob: Blob): void {
+    this.closeCropper();
+    const file = new File([blob], 'photo.jpg', { type: blob.type });
+
+    this.uploading.set(true);
     this.userService.uploadPhoto(this.userId(), file).subscribe({
       next: res => {
         this.uploading.set(false);
         this.uploaded.emit(res.url);
-        input.value = '';
       },
       error: (err: HttpErrorResponse) => {
         this.uploading.set(false);
-        input.value = '';
         this.errorMessage.set(err.status === 403 ? 'No tienes permiso para actualizar esta foto.' : 'No se pudo subir la foto.');
       }
     });
+  }
+
+  onCropCancelled(): void {
+    this.closeCropper();
+  }
+
+  private closeCropper(): void {
+    this.cropOpen.set(false);
+    const url = this.cropSrc();
+    if (url) URL.revokeObjectURL(url);
+    this.cropSrc.set(null);
+    const input = this.fileInput()?.nativeElement;
+    if (input) input.value = '';
   }
 }

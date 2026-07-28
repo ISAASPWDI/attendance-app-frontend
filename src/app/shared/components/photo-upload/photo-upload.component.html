@@ -22,4 +22,14 @@
   </div>
 
   <input #fileInput type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
+
+  <app-image-cropper
+    [open]="cropOpen()"
+    [imageSrc]="cropSrc()"
+    [aspectRatio]="1"
+    [rounded]="true"
+    title="Ajustar foto de perfil"
+    (cropped)="onCropped($event)"
+    (cancelled)="onCropCancelled()"
+  />
 </div>
