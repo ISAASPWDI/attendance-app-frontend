@@ -95,13 +95,23 @@ export class ImageCropperComponent {
     if (!img) return;
 
     const totalScale = this.baseScale() * this.zoom();
-    const sx = -this.posX() / totalScale;
-    const sy = -this.posY() / totalScale;
-    const sw = this.viewportWidth / totalScale;
-    const sh = this.viewportHeight() / totalScale;
+    const rawSx = -this.posX() / totalScale;
+    const rawSy = -this.posY() / totalScale;
+    const rawSw = this.viewportWidth / totalScale;
+    const rawSh = this.viewportHeight() / totalScale;
 
-    const exportWidth = EXPORT_WIDTH;
-    const exportHeight = EXPORT_WIDTH / this.aspectRatio();
+    // Clamp the source rect to the image's actual bounds — a no-op for 'cover' (already fully
+    // covered), but for 'contain' this trims away the letterboxed padding so the exported file
+    // has no wasted blank space (which would otherwise shrink the visible content when a
+    // consumer scales the whole file down to a small thumbnail, e.g. a report cell).
+    const sx = Math.max(0, rawSx);
+    const sy = Math.max(0, rawSy);
+    const sw = Math.min(this.naturalWidth(), rawSx + rawSw) - sx;
+    const sh = Math.min(this.naturalHeight(), rawSy + rawSh) - sy;
+
+    const contentAspect = sw / sh;
+    const exportWidth = contentAspect >= 1 ? EXPORT_WIDTH : EXPORT_WIDTH * contentAspect;
+    const exportHeight = contentAspect >= 1 ? EXPORT_WIDTH / contentAspect : EXPORT_WIDTH;
 
     const canvas = document.createElement('canvas');
     canvas.width = exportWidth;

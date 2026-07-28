@@ -57,6 +57,7 @@ export class DirectorDashboardComponent implements OnInit {
   readonly teachers = signal<UserDetail[]>([]);
   readonly showCreateForm = signal(false);
   readonly creating = signal(false);
+  readonly maxDate = this.isoDate(new Date());
 
   readonly filterForm = this.fb.nonNullable.group({
     teacherName: [''],
@@ -209,5 +210,12 @@ export class DirectorDashboardComponent implements OnInit {
 
   formatTime(value: string | null): string {
     return value ? value.slice(0, 5) : '';
+  }
+
+  private isoDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }
