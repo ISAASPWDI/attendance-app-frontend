@@ -40,7 +40,7 @@ export class PhotoUploadComponent {
 
   onCropped(blob: Blob): void {
     this.closeCropper();
-    const file = new File([blob], 'photo.jpg', { type: blob.type });
+    const file = new File([blob], 'photo.png', { type: blob.type });
 
     this.uploading.set(true);
     this.userService.uploadPhoto(this.userId(), file).subscribe({

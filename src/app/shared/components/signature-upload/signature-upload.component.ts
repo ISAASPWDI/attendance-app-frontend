@@ -49,7 +49,7 @@ export class SignatureUploadComponent implements OnDestroy {
   onCropped(blob: Blob): void {
     this.closeCropper();
     this.revokePreview();
-    const file = new File([blob], 'signature.jpg', { type: blob.type });
+    const file = new File([blob], 'signature.png', { type: blob.type });
     this.pendingFile.set(file);
     this.previewUrl.set(URL.createObjectURL(file));
   }

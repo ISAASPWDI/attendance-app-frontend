@@ -108,7 +108,7 @@ export class ImageCropperComponent {
 
     canvas.toBlob(blob => {
       if (blob) this.cropped.emit(blob);
-    }, 'image/jpeg', 0.92);
+    }, 'image/png');
   }
 
   cancel(): void {
