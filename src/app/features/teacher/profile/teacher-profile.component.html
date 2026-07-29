@@ -1,6 +1,50 @@
 <div class="mx-auto max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-  <div class="text-base font-bold text-gray-900">Mi perfil</div>
-  <p class="mt-0.5 text-sm text-gray-500">{{ user()?.firstName }} {{ user()?.lastName }} · {{ user()?.username }}</p>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <div class="text-base font-bold text-gray-900">Mi perfil</div>
+      <p class="mt-0.5 text-sm text-gray-500">{{ user()?.firstName }} {{ user()?.lastName }} · {{ user()?.username }}</p>
+    </div>
+    @if (!editing()) {
+      <button
+        type="button"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+        (click)="startEdit()"
+      >
+        Editar perfil
+      </button>
+    }
+  </div>
+
+  @if (editing()) {
+    <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="firstName">Nombre</label>
+        <input id="firstName" type="text" formControlName="firstName"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-700" for="lastName">Apellido</label>
+        <input id="lastName" type="text" formControlName="lastName"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30" />
+      </div>
+      <div class="sm:col-span-2 flex justify-end gap-3">
+        <button
+          type="button"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+          (click)="cancelEdit()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          [disabled]="editForm.invalid || saving()"
+        >
+          {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </form>
+  }
 
   @if (user()) {
     <div class="mt-5 flex flex-wrap items-center gap-6">
@@ -13,4 +57,23 @@
       <app-signature-upload [userId]="user()!.id" />
     </div>
   }
+
+  <div class="mt-6 border-t border-gray-200 pt-5">
+    <button
+      type="button"
+      class="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+      (click)="confirmingDelete.set(true)"
+    >
+      Eliminar mi cuenta
+    </button>
+  </div>
 </div>
+
+<app-confirm-dialog
+  [open]="confirmingDelete()"
+  title="¿Eliminar tu cuenta?"
+  message="Esta acción no se puede deshacer. Se eliminará tu cuenta y todo tu historial de asistencias."
+  confirmLabel="Eliminar cuenta"
+  (confirmed)="deleteAccount()"
+  (cancelled)="confirmingDelete.set(false)"
+/>
